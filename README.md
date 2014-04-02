@@ -10,7 +10,7 @@ Once you have scaffolded the application, simply `cd` into the application folde
 
 This will start up a server that will host your application, and then open your default browser pointing at it. Any time you change a html file, a javascript file, or a css file, the application will automatically be reloaded. Behold the magic of 'live reload'!
 
-Additionally, once you have connected your app to a gitbut repo, you can use `grunt deploy` and it will automagically take the current master branch and deploy it to `gh-pages`, which makes it publicly accessible at [http://pilsna.github.io/awsdk-ago](http://pilsna.github.io/awsdk-ago). Hotness!
+Additionally, once you have connected your app to a gitbut repo, you can use `grunt deploy` and it will automagically take the current master branch and deploy it to `gh-pages`, which makes it publicly accessible at [http://pilsna.github.io/ago-search-bootstrap](http://pilsna.github.io/ago-search-bootstrap). Hotness!
 
 
 ## We are Using...
@@ -27,16 +27,14 @@ Additionally, once you have connected your app to a gitbut repo, you can use `gr
 
 ## Known Issues
 
-??? I did build this late at night, so things may break :)
+The Search dropdown is not visible when the navbar is collapsed.
 
 ## Contributing to the Generator
 
 Anyone and everyone is welcome to contribute. [http://github.com/dbouwman/generator-bootmap](http://github.com/dbouwman/generator-bootmap)
 
-## Contributing to `awsdk-ago` - uuh...  you need to fill this out eh :)
-
 ## Licensing
-Copyright 2014 Esri
+Copyright 2014 Nils Rydh
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
