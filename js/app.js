@@ -1,11 +1,12 @@
  require([
          "esri/map",
          "esri/dijit/Scalebar",
+         "esri/geometry/Extent",
          "esri/layers/WebTiledLayer",
          "./js/bootstrapmap.js",
-         "dojo/domReady!"
+         "dojo/domReady!",
      ],
-     function(Map, Scalebar, WebTiledLayer, BootstrapMap) {
+     function(Map, Scalebar, Extent, WebTiledLayer, BootstrapMap) {
          <!-- Get a reference to the ArcGIS Map class -->
          var map = BootstrapMap.create("mapDiv", {
              basemap: 'gray',
@@ -78,5 +79,44 @@
                          break;
                  }
              });
+             var addresses = new Bloodhound({
+                 name: 'ago-geocode',
+                 datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+                 queryTokenizer: Bloodhound.tokenizers.whitespace,
+                 remote: {
+                     url: 'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=%QUERY&maxLocations=2&f=pjson',
+                     filter: function(response) {
+                         return $.map(response.suggestions, function(location) {
+                             return {
+                                 text: location.text,
+                                 magicKey: location.magicKey
+                             };
+                         });
+                     }
+                 }
+             });
+
+             addresses.initialize();
+             /*addresses.get('Sweden', function(suggestions) {
+              console.log(suggestions);
+                $(suggestions).each(function(suggestion) {
+                    console.log(suggestion);
+                });
+              });*/
+             $('.typeahead').typeahead(null, {
+                 name: 'text',
+                 displayKey: 'text',
+                 source: addresses.ttAdapter()
+             }).on('typeahead:selected', function($e, datum) {
+                //http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find?text="<text1>"&magicKey="<magicKey1>"&f=json
+                var url = 'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find?text=' + datum.text + '&magicKey=' + datum.magicKey + '&f=json';
+                $.get(url, function(data){
+                    var result = JSON.parse(data);
+                    var extent = new Extent(result.locations[0].extent);
+                    map.setExtent(extent, true);
+                });
+
+             });
+
          });
      });

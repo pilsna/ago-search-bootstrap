@@ -17,3 +17,8 @@ table {
   padding: 40px 15px;
   text-align: center;
 }
+
+.typeahead {
+	width: 100%;
+	min-width: 275px;
+}
