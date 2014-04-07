@@ -4,10 +4,11 @@
          "esri/dijit/Scalebar",
          "esri/geometry/Extent",
          "esri/layers/WebTiledLayer",
+         "dojo/dom",
          "./js/bootstrapmap.js",
          "dojo/domReady!",
      ],
-     function(arcgisUtils, Map, Scalebar, Extent, WebTiledLayer, BootstrapMap) {
+     function(arcgisUtils, Map, Scalebar, Extent, WebTiledLayer, dom, BootstrapMap) {
          <!-- Get a reference to the ArcGIS Map class -->
          var map = null;
          /* BootstrapMap.create("mapDiv", {
@@ -17,8 +18,8 @@
          }); */
          var deferred = arcgisUtils.createMap("8b3ce9af79724f30a9f924c7bca1d339", "mapDiv").then(function(response) {
              //update the app 
-             dom.byId("title").innerHTML = response.itemInfo.item.title;
-             dom.byId("subtitle").innerHTML = response.itemInfo.item.snippet;
+             $("#title").text(response.itemInfo.item.title);
+             $("#subtitle").text(response.itemInfo.item.snippet);
 
              map = response.map;
          });
