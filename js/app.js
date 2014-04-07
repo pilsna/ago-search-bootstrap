@@ -1,4 +1,5 @@
  require([
+        "esri/arcgis/utils",
          "esri/map",
          "esri/dijit/Scalebar",
          "esri/geometry/Extent",
@@ -6,18 +7,23 @@
          "./js/bootstrapmap.js",
          "dojo/domReady!",
      ],
-     function(Map, Scalebar, Extent, WebTiledLayer, BootstrapMap) {
+     function(arcgisUtils, Map, Scalebar, Extent, WebTiledLayer, BootstrapMap) {
          <!-- Get a reference to the ArcGIS Map class -->
-         var map = BootstrapMap.create("mapDiv", {
+         var map = null;
+         /* BootstrapMap.create("mapDiv", {
              basemap: 'gray',
              center: [-117.1, 33.6],
              zoom: 9
-         });
+         }); */
+         var deferred = arcgisUtils.createMap("8b3ce9af79724f30a9f924c7bca1d339", "mapDiv").then(function(response) {
+             //update the app 
+             dom.byId("title").innerHTML = response.itemInfo.item.title;
+             dom.byId("subtitle").innerHTML = response.itemInfo.item.snippet;
 
-         var scalebar = new Scalebar({
-             map: map,
-             scalebarUnit: "dual"
+             map = response.map;
          });
+         
+         // 8b3ce9af79724f30a9f924c7bca1d339
 
          $(document).ready(function() {
              $("#basemapList li").click(function(e) {
@@ -108,13 +114,13 @@
                  displayKey: 'text',
                  source: addresses.ttAdapter()
              }).on('typeahead:selected', function($e, datum) {
-                //http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find?text="<text1>"&magicKey="<magicKey1>"&f=json
-                var url = 'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find?text=' + datum.text + '&magicKey=' + datum.magicKey + '&f=json';
-                $.get(url, function(data){
-                    var result = JSON.parse(data);
-                    var extent = new Extent(result.locations[0].extent);
-                    map.setExtent(extent, true);
-                });
+                 //http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find?text="<text1>"&magicKey="<magicKey1>"&f=json
+                 var url = 'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find?text=' + datum.text + '&magicKey=' + datum.magicKey + '&f=json';
+                 $.get(url, function(data) {
+                     var result = JSON.parse(data);
+                     var extent = new Extent(result.locations[0].extent);
+                     map.setExtent(extent, true);
+                 });
 
              });
 

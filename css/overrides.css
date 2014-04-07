@@ -22,3 +22,7 @@ table {
 	width: 100%;
 	min-width: 275px;
 }
+
+.wrapper {
+    height: 700px;
+}
