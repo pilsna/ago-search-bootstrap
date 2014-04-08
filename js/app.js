@@ -14,33 +14,35 @@
          var map = null;
          var operationalLayers = null;
          var swipeWidget = null;
+         var currentSelection = null;
 
          var deferred = arcgisUtils.createMap("8b3ce9af79724f30a9f924c7bca1d339", "mapDiv").then(function(response) {
              map = response.map;
+             operationalLayers = response.itemInfo.itemData.operationalLayers;
+
              $("#title").text(response.itemInfo.item.title);
              $("#subtitle").text(response.itemInfo.item.snippet);
-             operationalLayers = response.itemInfo.itemData.operationalLayers;
-             console.log(response.itemInfo.itemData.operationalLayers);
-             //map.removeLayer(response.itemInfo.itemData.operationalLayers[1]);
-             //map.removeLayer(response.itemInfo.itemData.operationalLayers[0]);
-             //operationalLayers[0].layerObject.hide();
-             //operationalLayers[1].layerObject.hide();
 
-             console.log(operationalLayers);
+             var selectList = [];
+             $.each(operationalLayers, function(i, item) {
+                 selectList.push('<option value="' + i + '">' + item.title + '</option>');
+                 console.log(item);
+             }); // close each()
+             $('select.layers').append(selectList.join(''));
 
-            swipeWidget = new LayerSwipe({
+             swipeWidget = new LayerSwipe({
                  type: "vertical", //Try switching to "scope" or "horizontal"
                  map: map,
-                 layers: [operationalLayers[1].layerObject]
+                 layers: [operationalLayers[2].layerObject]
              }, "swipeContainer");
              swipeWidget.startup();
-             on(swipeWidget, 'swipe', function(layers) {
+             /* on(swipeWidget, 'swipe', function(layers) {
                  console.log(layers);
-             });
+             }); */
          });
-        var setSwipelayer = function(layer){
-            swipeWidget.layers = [layer];
-        }
+         var setSwipelayer = function(layer) {
+             swipeWidget.layers = [layer];
+         }
          // 8b3ce9af79724f30a9f924c7bca1d339
          var switchToBasemap = function(name) {
              var l, options;
@@ -102,7 +104,7 @@
              $("#basemapList li").click(function(e) {
                  map.removeAllLayers();
                  switchToBasemap(e.target.text);
-                 map.addLayers([operationalLayers[1].layerObject, operationalLayers[0].layerObject]);
+                 map.addLayers([operationalLayers[2].layerObject, operationalLayers[0].layerObject]);
                  setSwipelayer(operationalLayers[0].layerObject);
              });
              var addresses = new Bloodhound({
