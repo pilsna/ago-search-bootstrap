@@ -27,7 +27,7 @@
 
              var selectList = [];
              $.each(operationalLayers, function(i, item) {
-                 selectList.push('<option value="' + i + '">' + item.title + '</option>');
+                 selectList.push('<option value="' + item.id + '">' + item.title + '</option>');
              }); // close each()
              $('select.layers').append(selectList.join(''));
              var onChange = function(event) {
