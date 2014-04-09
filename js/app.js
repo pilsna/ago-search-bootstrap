@@ -17,6 +17,8 @@
          var currentSelection = null;
          var layerListLeft = $('#layerListLeft');
          var layerListRight = $('#layerListRight');
+         var switchBoard = null;
+         var basemap = "Gray";
 
          var deferred = arcgisUtils.createMap("8b3ce9af79724f30a9f924c7bca1d339", "mapDiv").then(function(response) {
              map = response.map;
@@ -27,12 +29,15 @@
 
              var selectList = [];
              $.each(operationalLayers, function(i, item) {
-                 selectList.push('<option value="' + item.id + '">' + item.title + '</option>');
+                 selectList.push('<option value="' + i + '">' + item.title + '</option>');
              }); // close each()
              $('select.layers').append(selectList.join(''));
 
              /* .empty() */
+             switchBoard = new SwitchBoard(layerListLeft, layerListRight, operationalLayers, setSwipeLayer);
+
              var onChange = function(event) {
+                 switchBoard.update(event.currentTarget, $(this).val());
                  console.log(event);
                  console.log($(this).val());
              }
@@ -49,12 +54,63 @@
                  console.log(layers);
              }); */
          });
-
-         var setSwipelayer = function(layer) {
-             swipeWidget.layers = [layer];
+         var removeLayers = function(list) {
+             $.each(list, function(i, layerInfo) {
+                 map.removeLayer(layerInfo.layerObject);
+             });
+         }
+         var setSwipeLayer = function(layers) {
+             swipeWidget.disable();
+             removeLayers(operationalLayers);
+             //switchToBasemap(basemap);
+             map.addLayers([layers[0].layerObject, layers[1].layerObject]);
+             swipeWidget.layers = [layers[1].layerObject];
+             swipeWidget.enable();
          }
 
+         var SwitchBoard = function(divLeft, divRight, layers, callback) {
+             this.setSwipeLayer = callback;
+             this.layersToShow = [];
+             this.refresh = function() {
+                 if (this.layersToShow.length === 2) {
+                     this.setSwipeLayer(this.layersToShow);
+                 } else {
+                     console.log("Could not refresh " + this.layersToShow);
+                 }
+             }
+             this.update = function(target, value) {
+                 var roll = function(id) {
+                     $.each(layers, function(index, layer) {
+                         if (id !== layer.id) {
+                             return layer.id;
+                         }
+                     });
+                 }
+                 if (divLeft.val() === '-1') {
+                     divLeft.val(0);
+                 }
+                 if (divRight.val() === '-1') {
+                     divRight.val(0);
+                 }
+                 if (divRight[0] === target) {
+                     this.layersToShow[0] = layers[divRight.val()];
+                     this.layersToShow[1] = layers[divLeft.val()];
+                 } else {
+                     this.layersToShow[1] = layers[divLeft.val()];
+                     this.layersToShow[0] = layers[divRight.val()];
+                 }
+                 this.refresh();
+
+                 console.log(divRight[0] === $(this)[0]);
+                 console.log("event value " + value);
+             };
+             //divLeft.change(this.onChange);
+             //divRight.change(this.onChange);
+
+
+         }
          var switchToBasemap = function(name) {
+             basemap = name;
              var l, options;
              switch (name) {
                  case "Water Color":
@@ -114,8 +170,9 @@
              $("#basemapList li").click(function(e) {
                  map.removeAllLayers();
                  switchToBasemap(e.target.text);
-                 map.addLayers([operationalLayers[2].layerObject, operationalLayers[0].layerObject]);
-                 setSwipelayer(operationalLayers[0].layerObject);
+                 switchBoard.refresh();
+                 //map.addLayers([operationalLayers[2].layerObject, operationalLayers[0].layerObject]);
+                 //setSwipeLayer(operationalLayers[0].layerObject);
              });
              var addresses = new Bloodhound({
                  name: 'ago-geocode',
