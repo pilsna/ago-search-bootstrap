@@ -14,6 +14,7 @@
      function(arcgisUtils, Map, Scalebar, Extent, WebTiledLayer, LayerSwipe, dom, on, BootstrapMap) {
          var map = null;
          var operationalLayers = null;
+         var bookmarks = null;
          var swipeWidget = null;
          var currentSelection = null;
          var layerListLeft = $('#layerListLeft');
@@ -26,22 +27,30 @@
 
              map = response.map;
              operationalLayers = response.itemInfo.itemData.operationalLayers;
+             bookmarks = response.itemInfo.itemData.bookmarks;
 
              $("#title").text(response.itemInfo.item.title);
              $("#subtitle").text(response.itemInfo.item.snippet);
 
              var selectList = [];
-             /*$.each(operationalLayers, function(i, item) {
-                 selectList.push('<option value="' + i + '">' + item.title + '</option>');
-             }); // close each()
-             */
+             
              for (var i = operationalLayers.length - 1; i >= 0; --i) {
-                selectList.push('<option value="' + i + '">' + operationalLayers[i].title + '</option>');
+                 selectList.push('<option value="' + i + '">' + operationalLayers[i].title + '</option>');
              }
              $('select.layers').append(selectList.join(''));
 
-             switchBoard = new SwitchBoard(layerListLeft, layerListRight, operationalLayers, setSwipeLayer);
+             var bookmarkList = [];
+             $.each(bookmarks, function(i, item) {
+                 bookmarkList.push('<li><a id="' + i + '" href="#">' + item.name + '</a></li>');
+             });
+             $('#bookmarks').append(bookmarkList.join(''));
+             $('#bookmarks').click(function(event) {
+                 console.log(event.target.id);
+                 console.log(bookmarks[event.target.id]);
+                 setExtent(bookmarks[event.target.id].extent);
+             });
 
+             switchBoard = new SwitchBoard(layerListLeft, layerListRight, operationalLayers, setSwipeLayer);
 
              var onChange = function(event) {
                  switchBoard.update(event.currentTarget);
@@ -149,12 +158,14 @@
                  var url = 'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find?text=' + datum.text + '&magicKey=' + datum.magicKey + '&f=json';
                  $.get(url, function(data) {
                      var result = JSON.parse(data);
-                     var extent = new Extent(result.locations[0].extent);
-                     map.setExtent(extent, true);
+                     setExtent(result.locations[0].extent);
                  });
              });
          });
-
+         var setExtent = function(object) {
+             var extent = new Extent(object);
+             map.setExtent(extent, true);
+         }
          var switchToBasemap = function(name) {
              basemap = name;
              var l, options;

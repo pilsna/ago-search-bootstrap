@@ -20,7 +20,7 @@ table {
 @media(max-width:767px){ .wrapper { height: 320px; } }
 @media(min-width:768px){ .wrapper { height: 450px; } }
 @media(min-width:992px){ .wrapper { height: 700px; } }
-@media(min-width:1200px){ .wrapper { height: 800px; } }
+@media(min-width:1281px){ .wrapper { height: 800px; } }
 
 
 .layers{
@@ -28,6 +28,9 @@ table {
 }
 .navbar-collapse.in {
     overflow-y: visible;
+}
+.bottom {
+    padding-bottom: 40px;
 }
 /* ================ */
 
@@ -69,8 +72,8 @@ table {
     border: 1px solid #696363;
 }
 .LayerSwipe .vertical .handle {
-    width: 24px;
-    height: 32px;
+    width: 28px;
+    height: 36px;
     margin: -16px 0 0 -12px;
     position: absolute;
     z-index: 30;
