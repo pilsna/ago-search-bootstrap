@@ -29,7 +29,7 @@
                  console.log(item);
              }); // close each()
              $('select.layers').append(selectList.join(''));
-
+             /* .empty() */
              swipeWidget = new LayerSwipe({
                  type: "vertical", //Try switching to "scope" or "horizontal"
                  map: map,
