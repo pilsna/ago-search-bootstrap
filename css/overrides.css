@@ -16,24 +16,21 @@ table {
     width: 100%;
     min-width: 275px;
 }
-.wrapper {
-    height: 700px;
-}
-.footer {
-    z-index: 100;
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    width: 100%;
-    background-color: white;
-}
+
+@media(max-width:767px){ .wrapper { height: 320px; } }
+@media(min-width:768px){ .wrapper { height: 450px; } }
+@media(min-width:992px){ .wrapper { height: 700px; } }
+@media(min-width:1200px){ .wrapper { height: 800px; } }
+
+
 .layers{
-    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.navbar-collapse.in {
+    overflow-y: visible;
 }
 /* ================ */
-.layers {
-    margin-bottom: 10px;
-}
+
  .LayerSwipe .horizontal {
     position: absolute;
     border-top: 1px solid #696363;

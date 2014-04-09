@@ -9,6 +9,7 @@
          "dojo/on",
          "./js/bootstrapmap.js",
          "dojo/domReady!",
+         "esri/IdentityManager"
      ],
      function(arcgisUtils, Map, Scalebar, Extent, WebTiledLayer, LayerSwipe, dom, on, BootstrapMap) {
          var map = null;
@@ -19,8 +20,10 @@
          var layerListRight = $('#layerListRight');
          var switchBoard = null;
          var basemap = "Gray";
+         var webmap = "8b3ce9af79724f30a9f924c7bca1d339";
 
-         var deferred = arcgisUtils.createMap("8b3ce9af79724f30a9f924c7bca1d339", "mapDiv").then(function(response) {
+         var deferred = arcgisUtils.createMap(webmap, "mapDiv").then(function(response) {
+
              map = response.map;
              operationalLayers = response.itemInfo.itemData.operationalLayers;
 
@@ -28,16 +31,20 @@
              $("#subtitle").text(response.itemInfo.item.snippet);
 
              var selectList = [];
-             $.each(operationalLayers, function(i, item) {
+             /*$.each(operationalLayers, function(i, item) {
                  selectList.push('<option value="' + i + '">' + item.title + '</option>');
              }); // close each()
+             */
+             for (var i = operationalLayers.length - 1; i >= 0; --i) {
+                selectList.push('<option value="' + i + '">' + operationalLayers[i].title + '</option>');
+             }
              $('select.layers').append(selectList.join(''));
 
-             /* .empty() */
              switchBoard = new SwitchBoard(layerListLeft, layerListRight, operationalLayers, setSwipeLayer);
 
+
              var onChange = function(event) {
-                 switchBoard.update(event.currentTarget, $(this).val());
+                 switchBoard.update(event.currentTarget);
                  console.log(event);
                  console.log($(this).val());
              }
@@ -50,9 +57,7 @@
                  layers: [operationalLayers[2].layerObject]
              }, "swipeContainer");
              swipeWidget.startup();
-             /* on(swipeWidget, 'swipe', function(layers) {
-                 console.log(layers);
-             }); */
+             switchBoard.update();
          });
          var removeLayers = function(list) {
              $.each(list, function(i, layerInfo) {
@@ -62,10 +67,10 @@
          var setSwipeLayer = function(layers) {
              swipeWidget.disable();
              removeLayers(operationalLayers);
-             //switchToBasemap(basemap);
              map.addLayers([layers[0].layerObject, layers[1].layerObject]);
              swipeWidget.layers = [layers[1].layerObject];
              swipeWidget.enable();
+             swipeWidget.swipe();
          }
 
          var SwitchBoard = function(divLeft, divRight, layers, callback) {
@@ -78,7 +83,7 @@
                      console.log("Could not refresh " + this.layersToShow);
                  }
              }
-             this.update = function(target, value) {
+             this.update = function(target) {
                  var roll = function(id) {
                      $.each(layers, function(index, layer) {
                          if (id !== layer.id) {
@@ -100,15 +105,56 @@
                      this.layersToShow[0] = layers[divRight.val()];
                  }
                  this.refresh();
-
-                 console.log(divRight[0] === $(this)[0]);
-                 console.log("event value " + value);
              };
-             //divLeft.change(this.onChange);
-             //divRight.change(this.onChange);
-
 
          }
+         // do some searching
+         $(document).ready(function() {
+             var search = window.location.search;
+             if (search.length > 8) {
+                 if (search.endsWith('#')) {
+                     search = search.substring(8, search.length - 2);
+                 }
+                 webmap = search.substring(8);
+             }
+             $("#basemapList li").click(function(e) {
+                 map.removeAllLayers();
+                 switchToBasemap(e.target.text);
+                 switchBoard.refresh();
+             });
+             var addresses = new Bloodhound({
+                 name: 'ago-geocode',
+                 datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+                 queryTokenizer: Bloodhound.tokenizers.whitespace,
+                 remote: {
+                     url: 'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=%QUERY&maxLocations=2&f=pjson',
+                     filter: function(response) {
+                         return $.map(response.suggestions, function(location) {
+                             return {
+                                 text: location.text,
+                                 magicKey: location.magicKey
+                             };
+                         });
+                     }
+                 }
+             });
+
+             addresses.initialize();
+
+             $('.typeahead').typeahead(null, {
+                 name: 'text',
+                 displayKey: 'text',
+                 source: addresses.ttAdapter()
+             }).on('typeahead:selected', function($e, datum) {
+                 var url = 'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find?text=' + datum.text + '&magicKey=' + datum.magicKey + '&f=json';
+                 $.get(url, function(data) {
+                     var result = JSON.parse(data);
+                     var extent = new Extent(result.locations[0].extent);
+                     map.setExtent(extent, true);
+                 });
+             });
+         });
+
          var switchToBasemap = function(name) {
              basemap = name;
              var l, options;
@@ -165,47 +211,4 @@
                      break;
              }
          }
-         // do some searching
-         $(document).ready(function() {
-             $("#basemapList li").click(function(e) {
-                 map.removeAllLayers();
-                 switchToBasemap(e.target.text);
-                 switchBoard.refresh();
-                 //map.addLayers([operationalLayers[2].layerObject, operationalLayers[0].layerObject]);
-                 //setSwipeLayer(operationalLayers[0].layerObject);
-             });
-             var addresses = new Bloodhound({
-                 name: 'ago-geocode',
-                 datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
-                 queryTokenizer: Bloodhound.tokenizers.whitespace,
-                 remote: {
-                     url: 'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=%QUERY&maxLocations=2&f=pjson',
-                     filter: function(response) {
-                         return $.map(response.suggestions, function(location) {
-                             return {
-                                 text: location.text,
-                                 magicKey: location.magicKey
-                             };
-                         });
-                     }
-                 }
-             });
-
-             addresses.initialize();
-
-             $('.typeahead').typeahead(null, {
-                 name: 'text',
-                 displayKey: 'text',
-                 source: addresses.ttAdapter()
-             }).on('typeahead:selected', function($e, datum) {
-                 var url = 'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find?text=' + datum.text + '&magicKey=' + datum.magicKey + '&f=json';
-                 $.get(url, function(data) {
-                     var result = JSON.parse(data);
-                     var extent = new Extent(result.locations[0].extent);
-                     map.setExtent(extent, true);
-                 });
-
-             });
-
-         });
      });
