@@ -15,6 +15,8 @@
          var operationalLayers = null;
          var swipeWidget = null;
          var currentSelection = null;
+         var layerListLeft = $('#layerListLeft');
+         var layerListRight = $('#layerListRight');
 
          var deferred = arcgisUtils.createMap("8b3ce9af79724f30a9f924c7bca1d339", "mapDiv").then(function(response) {
              map = response.map;
@@ -25,11 +27,18 @@
 
              var selectList = [];
              $.each(operationalLayers, function(i, item) {
-                 selectList.push('<option value="' + i + '">' + item.title + '</option>');
-                 console.log(item);
+                 selectList.push('<option value="' + item.id + '">' + item.title + '</option>');
              }); // close each()
              $('select.layers').append(selectList.join(''));
+
              /* .empty() */
+             var onChange = function(event) {
+                 console.log(event);
+                 console.log($(this).val());
+             }
+             layerListLeft.change(onChange);
+             layerListRight.change(onChange);
+
              swipeWidget = new LayerSwipe({
                  type: "vertical", //Try switching to "scope" or "horizontal"
                  map: map,
@@ -40,10 +49,11 @@
                  console.log(layers);
              }); */
          });
+
          var setSwipelayer = function(layer) {
              swipeWidget.layers = [layer];
          }
-         // 8b3ce9af79724f30a9f924c7bca1d339
+
          var switchToBasemap = function(name) {
              var l, options;
              switch (name) {
@@ -99,7 +109,7 @@
                      break;
              }
          }
-
+         // do some searching
          $(document).ready(function() {
              $("#basemapList li").click(function(e) {
                  map.removeAllLayers();
