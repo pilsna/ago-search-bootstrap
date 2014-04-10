@@ -20,7 +20,7 @@
          var layerListLeft = $('#layerListLeft');
          var layerListRight = $('#layerListRight');
          var switchBoard = null;
-         var basemap = "Gray";
+         var basemap = "MapBox Space";
          var webmap = "8b3ce9af79724f30a9f924c7bca1d339";
 
          var deferred = arcgisUtils.createMap(webmap, "mapDiv").then(function(response) {
@@ -33,7 +33,7 @@
              $("#subtitle").text(response.itemInfo.item.snippet);
 
              var selectList = [];
-             
+
              for (var i = operationalLayers.length - 1; i >= 0; --i) {
                  selectList.push('<option value="' + i + '">' + operationalLayers[i].title + '</option>');
              }
@@ -66,7 +66,9 @@
                  layers: [operationalLayers[2].layerObject]
              }, "swipeContainer");
              swipeWidget.startup();
+             //switchToBasemap(basemap);
              switchBoard.update();
+
          });
          var removeLayers = function(list) {
              $.each(list, function(i, layerInfo) {
