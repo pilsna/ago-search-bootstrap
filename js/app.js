@@ -26,6 +26,22 @@
          var basemap = "MapBox Space";
          var webmap = "8b3ce9af79724f30a9f924c7bca1d339";
 
+         var setupOAuth = function(id, portal) {
+             OAuthHelper.init({
+                 appId: id,
+                 portal: portal,
+                 expiration: (14 * 24 * 60) //2 weeks (in minutes)
+             });
+         };
+
+         var urlObject = esri.urlToObject(document.location.href);
+         if (urlObject.query !== null && urlObject.query.webmap !== null) {
+             webmap = urlObject.query.webmap;
+         }
+         if (config.oauthappid) {
+             setupOAuth(config.oauthappid, config.sharinghost);
+         }
+
          var deferred = arcgisUtils.createMap(webmap, "mapDiv").then(function(response) {
 
              map = response.map;
@@ -42,16 +58,18 @@
              }
              $('select.layers').append(selectList.join(''));
 
-             var bookmarkList = [];
-             $.each(bookmarks, function(i, item) {
-                 bookmarkList.push('<li><a id="' + i + '" href="#">' + item.name + '</a></li>');
-             });
-             $('#bookmarks').append(bookmarkList.join(''));
-             $('#bookmarks').click(function(event) {
-                 console.log(event.target.id);
-                 console.log(bookmarks[event.target.id]);
-                 setExtent(bookmarks[event.target.id].extent);
-             });
+             if (bookmarks) {
+                 var bookmarkList = [];
+                 $.each(bookmarks, function(i, item) {
+                     bookmarkList.push('<li><a id="' + i + '" href="#">' + item.name + '</a></li>');
+                 });
+                 $('#bookmarks').append(bookmarkList.join(''));
+                 $('#bookmarks').click(function(event) {
+                     console.log(event.target.id);
+                     console.log(bookmarks[event.target.id]);
+                     setExtent(bookmarks[event.target.id].extent);
+                 });
+             }
 
              switchBoard = new SwitchBoard(layerListLeft, layerListRight, operationalLayers, setSwipeLayer);
 
@@ -86,13 +104,7 @@
              swipeWidget.enable();
              swipeWidget.swipe();
          }
-         var setupOAuth = function(id, portal) {
-             OAuthHelper.init({
-                 appId: id,
-                 portal: portal,
-                 expiration: (14 * 24 * 60) //2 weeks (in minutes)
-             });
-         };
+
          var SwitchBoard = function(divLeft, divRight, layers, callback) {
              this.setSwipeLayer = callback;
              this.layersToShow = [];
@@ -130,13 +142,6 @@
          }
          // do some searching
          $(document).ready(function() {
-             var urlObject = esri.urlToObject(document.location.href);
-             if (urlObject.query !== null && urlObject.query.webmap !== null) {
-                 webmap = urlObject.query.webmap;
-             }
-             if (config.oauthappid) {
-                 setupOAuth(config.oauthappid, config.sharinghost);
-             }
              $("#basemapList li").click(function(e) {
                  map.removeAllLayers();
                  switchToBasemap(e.target.text);
@@ -147,7 +152,7 @@
                  datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
                  queryTokenizer: Bloodhound.tokenizers.whitespace,
                  remote: {
-                     url: 'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=%QUERY&maxLocations=2&f=pjson',
+                     url: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=%QUERY&maxLocations=2&f=pjson',
                      filter: function(response) {
                          return $.map(response.suggestions, function(location) {
                              return {
@@ -166,7 +171,7 @@
                  displayKey: 'text',
                  source: addresses.ttAdapter()
              }).on('typeahead:selected', function($e, datum) {
-                 var url = 'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find?text=' + datum.text + '&magicKey=' + datum.magicKey + '&f=json';
+                 var url = 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find?text=' + datum.text + '&magicKey=' + datum.magicKey + '&f=json';
                  $.get(url, function(data) {
                      var result = JSON.parse(data);
                      setExtent(result.locations[0].extent);
