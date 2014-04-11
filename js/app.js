@@ -130,6 +130,7 @@
          }
          // do some searching
          $(document).ready(function() {
+             var urlObject = esri.urlToObject(document.location.href);
              if (urlObject.query !== null && urlObject.query.webmap !== null) {
                  webmap = urlObject.query.webmap;
              }
