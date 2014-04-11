@@ -50,6 +50,7 @@
 
              $("#title").text(response.itemInfo.item.title);
              $("#subtitle").text(response.itemInfo.item.snippet);
+             $("#email").attr('href', 'mailto:' + response.itemInfo.item.accessInformation);
 
              var selectList = [];
 
