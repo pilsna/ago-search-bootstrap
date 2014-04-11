@@ -1,4 +1,5 @@
  require([
+         "esri/config",
          "esri/arcgis/utils",
          "esri/map",
          "esri/dijit/Scalebar",
@@ -8,10 +9,12 @@
          "dojo/dom",
          "dojo/on",
          "./js/bootstrapmap.js",
+         "./js/OAuthHelper.js",
+         "./config/defaults.js",
          "dojo/domReady!",
          "esri/IdentityManager"
      ],
-     function(arcgisUtils, Map, Scalebar, Extent, WebTiledLayer, LayerSwipe, dom, on, BootstrapMap) {
+     function(esriConfig, arcgisUtils, Map, Scalebar, Extent, WebTiledLayer, LayerSwipe, dom, on, BootstrapMap, OAuthHelper, config) {
          var map = null;
          var operationalLayers = null;
          var bookmarks = null;
@@ -83,7 +86,13 @@
              swipeWidget.enable();
              swipeWidget.swipe();
          }
-
+         var setupOAuth = function(id, portal) {
+             OAuthHelper.init({
+                 appId: id,
+                 portal: portal,
+                 expiration: (14 * 24 * 60) //2 weeks (in minutes)
+             });
+         };
          var SwitchBoard = function(divLeft, divRight, layers, callback) {
              this.setSwipeLayer = callback;
              this.layersToShow = [];
@@ -121,12 +130,11 @@
          }
          // do some searching
          $(document).ready(function() {
-             var search = window.location.search;
-             if (search.length > 8) {
-                 if (search.endsWith('#')) {
-                     search = search.substring(8, search.length - 2);
-                 }
-                 webmap = search.substring(8);
+             if (urlObject.query !== null && urlObject.query.webmap !== null) {
+                 webmap = urlObject.query.webmap;
+             }
+             if (config.oauthappid) {
+                 setupOAuth(config.oauthappid, config.sharinghost);
              }
              $("#basemapList li").click(function(e) {
                  map.removeAllLayers();
