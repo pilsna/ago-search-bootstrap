@@ -26,7 +26,7 @@ table {
 }
 @media(min-width:992px) {
     .wrapper {
-        height: 550px;
+        height: 500px;
     }
 }
 @media(min-width:1281px) {
