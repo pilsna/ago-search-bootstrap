@@ -47,6 +47,7 @@ module.exports = function(grunt) {
       },
       src:['./js/**/*.js',
           './*.html',
+          './config/**/*.js',
           './css/**/*.css'
         ]
     },
@@ -76,6 +77,7 @@ module.exports = function(grunt) {
         files:[
           './js/**/*.js',
           './*.html',
+          './config/**/*.js',
           './css/**/*.css'
         ]
       }

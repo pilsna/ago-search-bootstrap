@@ -85,10 +85,9 @@
              swipeWidget = new LayerSwipe({
                  type: "vertical", //Try switching to "scope" or "horizontal"
                  map: map,
-                 layers: [operationalLayers[2].layerObject]
+                 layers: [operationalLayers[0].layerObject]
              }, "swipeContainer");
              swipeWidget.startup();
-             //switchToBasemap(basemap);
              switchBoard.update();
 
          });
